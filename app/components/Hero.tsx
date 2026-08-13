@@ -8,7 +8,7 @@ export default function Hero() {
       className="min-h-screen grid grid-cols-2 items-center gap-1  text-white"
       style={{ backgroundImage: "url('/background.png')" }}
     >
-      <div className="bg-black flex flex-col items-start gap-1 justify-center w-full px-16 py-8">
+      <div className="bg-black flex flex-col items-start gap-1 justify-center w-full px-12 py-8">
         <p className="text-xl">Hi, I'm</p>
         <h1 className="text-7xl text-[#A1A1AA] mb-2 font-semibold tracking-tight">
           Md Kaif Nawaz Khurram.
