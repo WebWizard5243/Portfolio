@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  FaGithub,
-  FaInstagram,
-  FaLinkedin,
-  FaTwitter,
-  FaXTwitter,
-} from "react-icons/fa6";
+import { FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa6";
 import { HiOutlineMail } from "react-icons/hi";
 
 export default function Navbar() {
@@ -23,7 +17,7 @@ export default function Navbar() {
         <a href="#contact">Contact</a>
       </div>
       <div className="flex gap-5">
-        <FaGithub href="" />
+        <FaGithub />
         <FaLinkedin />
         <FaInstagram />
         <HiOutlineMail />

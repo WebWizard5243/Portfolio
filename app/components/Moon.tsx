@@ -95,7 +95,7 @@ export default function Moon() {
       });
 
     const gltfLoader = new GLTFLoader();
-    const clock = new THREE.Timer();
+    const clock = new THREE.Clock();
     let t = 0;
     gltfLoader.load(
       "/Space_rocket.glb",
@@ -137,11 +137,11 @@ export default function Moon() {
         });
 
         const flameSprite = new THREE.Sprite(flameMat);
-        // Scale it up (Sprites scale in X and Y)
+        // scale
         flameSprite.scale.set(rocketHeight * 80, rocketHeight * 30, 1);
         flameGroup.add(flameSprite);
 
-        // Position flame at the tail of the rocket
+        // Position flame
         flameGroup.position.y = box.min.y - rocketHeight * 8;
         rocket.add(flameGroup);
 
@@ -153,7 +153,6 @@ export default function Moon() {
         const startPosition = orbitCurve.getPointAt(0);
         rocketContainer.position.copy(startPosition);
 
-        // Force world matrix update so localToWorld works
         orbitGrp.updateMatrixWorld(true);
 
         const animate = () => {
@@ -161,7 +160,7 @@ export default function Moon() {
 
           const delta = clock.getDelta();
 
-          t -= delta * 0.1;
+          t -= delta * 0.14;
 
           if (t < 0) {
             t = 1;
