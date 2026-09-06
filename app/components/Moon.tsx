@@ -34,13 +34,36 @@ export default function Moon() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     el.appendChild(renderer.domElement);
 
+    // Resize handler
+    const handleResize = () => {
+      if (!mountRef.current) return;
+      const width = mountRef.current.clientWidth;
+      const height = mountRef.current.clientHeight;
+
+      camera.aspect = width / height;
+
+      // iPad Pro (1024px wide) and tall/narrow portrait columns (< 0.65 aspect)
+      if (window.innerWidth <= 1024 || camera.aspect < 0.65) {
+        camera.position.z = 5 / camera.aspect;
+      } else {
+        // Desktop: default camera distance = 5
+        camera.position.z = 5;
+      }
+
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
     //texture
     const textureLoader = new THREE.TextureLoader();
     const moonTexture = textureLoader.load(
       "/moonTexture.png",
       () => {
         console.log("Moon texture loaded");
-        renderer.render(scene, camera);
       },
       undefined,
       (error) => {
@@ -84,19 +107,15 @@ export default function Moon() {
     orbitGrp.rotation.x = THREE.MathUtils.degToRad(40);
     orbitGrp.rotation.z = THREE.MathUtils.degToRad(20);
 
-    console.log("REACHED ROCKET LOADER");
-
-    fetch("/Space_rocket.glb")
-      .then((response) => {
-        console.log("Rocket response:", response.status, response.statusText);
-      })
-      .catch((error) => {
-        console.error("Rocket fetch failed:", error);
-      });
-
     const gltfLoader = new GLTFLoader();
     const clock = new THREE.Clock();
     let t = 0;
+    let animId: number;
+
+    let rocketContainer: THREE.Group | null = null;
+    let flameGroup: THREE.Group | null = null;
+    let flameSprite: THREE.Sprite | null = null;
+
     gltfLoader.load(
       "/Space_rocket.glb",
       (gltf) => {
@@ -108,7 +127,7 @@ export default function Moon() {
         const box = new THREE.Box3().setFromObject(rocket);
         const rocketHeight = box.max.y - box.min.y;
 
-        const flameGroup = new THREE.Group();
+        flameGroup = new THREE.Group();
 
         // Generate procedural fire texture
         const canvas = document.createElement("canvas");
@@ -136,16 +155,14 @@ export default function Moon() {
           depthWrite: false,
         });
 
-        const flameSprite = new THREE.Sprite(flameMat);
-        // scale
+        flameSprite = new THREE.Sprite(flameMat);
         flameSprite.scale.set(rocketHeight * 80, rocketHeight * 30, 1);
         flameGroup.add(flameSprite);
 
-        // Position flame
         flameGroup.position.y = box.min.y - rocketHeight * 8;
         rocket.add(flameGroup);
 
-        const rocketContainer = new THREE.Group();
+        rocketContainer = new THREE.Group();
         rocketContainer.add(rocket);
 
         orbitGrp.add(rocketContainer);
@@ -154,61 +171,66 @@ export default function Moon() {
         rocketContainer.position.copy(startPosition);
 
         orbitGrp.updateMatrixWorld(true);
-
-        const animate = () => {
-          requestAnimationFrame(animate);
-
-          const delta = clock.getDelta();
-
-          t -= delta * 0.14;
-
-          if (t < 0) {
-            t = 1;
-          }
-
-          const position = orbitCurve.getPointAt(t);
-          const tangent = orbitCurve.getTangentAt(t);
-
-          rocketContainer.position.copy(position);
-
-          // Update world matrices before doing space conversions
-          orbitGrp.updateMatrixWorld(true);
-
-          // Transform tangent from orbitGrp local space to world space
-          const worldTangent = tangent
-            .clone()
-            .transformDirection(orbitGrp.matrixWorld);
-
-          // Flatten Y in world space so rocket only faces left/right
-          worldTangent.y = 0;
-          worldTangent.normalize();
-
-          // Get rocket's world position for a proper world-space lookAt target
-          const worldPos = new THREE.Vector3();
-          rocketContainer.getWorldPosition(worldPos);
-
-          rocketContainer.up.set(0, 1, 0);
-          rocketContainer.lookAt(worldPos.clone().add(worldTangent));
-
-          // Flame flicker animation
-          const flickerScale = 0.8 + Math.random() * 0.4;
-          flameGroup.scale.set(flickerScale, flickerScale, flickerScale);
-          flameSprite.material.opacity = 0.7 + Math.random() * 0.3;
-
-          renderer.render(scene, camera);
-        };
-
-        animate();
-
-        console.log("Rocket Loaded", rocket);
       },
-
       undefined,
-
       (error) => {
         console.error("rocket failed to load", error);
       },
     );
+
+    const animate = () => {
+      animId = requestAnimationFrame(animate);
+
+      // Rotate moon slightly for 3D realism
+      moon.rotation.y += 0.0009;
+
+      if (rocketContainer && flameGroup && flameSprite) {
+        const delta = clock.getDelta();
+
+        t -= delta * 0.14;
+
+        if (t < 0) {
+          t = 1;
+        }
+
+        const position = orbitCurve.getPointAt(t);
+        const tangent = orbitCurve.getTangentAt(t);
+
+        rocketContainer.position.copy(position);
+
+        orbitGrp.updateMatrixWorld(true);
+
+        const worldTangent = tangent
+          .clone()
+          .transformDirection(orbitGrp.matrixWorld);
+
+        worldTangent.y = 0;
+        worldTangent.normalize();
+
+        const worldPos = new THREE.Vector3();
+        rocketContainer.getWorldPosition(worldPos);
+
+        rocketContainer.up.set(0, 1, 0);
+        rocketContainer.lookAt(worldPos.clone().add(worldTangent));
+
+        const flickerScale = 0.8 + Math.random() * 0.4;
+        flameGroup.scale.set(flickerScale, flickerScale, flickerScale);
+        flameSprite.material.opacity = 0.7 + Math.random() * 0.3;
+      }
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", handleResize);
+      renderer.dispose();
+      if (el.contains(renderer.domElement)) {
+        el.removeChild(renderer.domElement);
+      }
+    };
   }, []);
 
   return <div ref={mountRef} className="h-full w-full"></div>;

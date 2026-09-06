@@ -40,10 +40,10 @@ export default function Skills() {
       <div className="">
         <BlurText
           text="Skills"
-          className="text-5xl justify-center text-center font-bold tracking-wider mb-10"
+          className=" text-3xl md:text-5xl justify-center text-center font-bold tracking-wider mb-10"
         />
 
-        <p className="text-xl text-center tracking-wider ">
+        <p className="text-lg md:text-xl text-center tracking-widest text-gray-400">
           Technologies I've spent time building, breaking, and learning with.
         </p>
       </div>
@@ -58,8 +58,8 @@ export default function Skills() {
           </div>
         ))}
         shape="ellipse"
-        baseWidth={1200}
-        radiusX={420}
+        baseWidth={1300}
+        radiusX={520}
         radiusY={90}
         rotation={-8}
         duration={30}

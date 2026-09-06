@@ -1,21 +1,24 @@
 import React from "react";
 import CircularGallery from "./circularGallery";
+import BlurText from "./BlurText";
 
 export default function Project() {
   return (
     <div
       id="project"
-      className="min-h-screen text-white items-center    flex flex-col bg-black"
+      className="w-full text-white items-center flex flex-col bg-black py-12 md:py-16"
     >
       <div>
-        <h1 className="text-5xl text-center  mt-5 mb-10 justify-center font bolder tracking-wide">
-          Projects
-        </h1>
-        <p className="text-xl text-center tracking-widest">
+        <BlurText
+          text="Projects"
+          className="text-3xl md:text-5xl text-center mt-5 mb-10 justify-center font-bold tracking-wide"
+        />
+
+        <p className="text-lg md:text-xl text-center text-gray-400 tracking-widest">
           A glimpse into what I build when curiosity strikes
         </p>
       </div>
-      <div style={{ height: "600px", width: "80vw" }}>
+      <div className="w-[90vw] md:w-[80vw] flex flex-col items-center mt-6">
         <CircularGallery
           bend={1}
           textColor="#ffffff"

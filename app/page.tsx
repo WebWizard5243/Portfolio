@@ -7,7 +7,7 @@ import Skills from "./components/Skills";
 
 export default function Page() {
   return (
-    <div className="relative w-full overflow-x-hidden">
+    <div className="relative w-full overflow-x-hidden ">
       <Navbar />
       <Hero />
       <AboutMe />
